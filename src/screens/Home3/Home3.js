@@ -27,7 +27,7 @@ const Home3 = ({navigation}) => {
             alignItems: 'center',
             justifyContent: 'flex-end',
           }}
-          onPress={() => navigation.navigate('Select')}>
+          onPress={() => navigation.navigate('Login')}>
           <Image
             style={styles.next}
             resizeMode="contain"
@@ -41,7 +41,7 @@ const Home3 = ({navigation}) => {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: '#191A1F',
+    backgroundColor: '#1d1d1d',
     justifyContent: 'center',
     alignItems: 'center',
   },
