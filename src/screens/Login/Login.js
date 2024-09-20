@@ -34,7 +34,7 @@ const Login = ({ navigation }) => {
 
       if (response.ok) {
         Alert.alert('Success', 'Logged in successfully!');
-        navigation.navigate('Home1');
+        navigation.navigate('Dashboard');
       } else {
         Alert.alert('Error', data.message || 'Login failed.');
       }
@@ -149,7 +149,7 @@ const styles = StyleSheet.create({
     flex: 1,
     height: 50,
     paddingLeft: 10,
-    color: 'whitelab',
+    color: 'white',
     borderRadius: 10,
   },
   eyeIcon: {

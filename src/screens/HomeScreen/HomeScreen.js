@@ -78,7 +78,7 @@ const styles = StyleSheet.create({
   background: {
     flex: 1,
     resizeMode: 'cover',
-    backgroundColor: 'black',
+    backgroundColor: '#1d1d1d',
   },
   sliderThumb: {
     width: 40,
