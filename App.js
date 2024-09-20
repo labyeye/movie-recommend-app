@@ -6,6 +6,7 @@ import { createBottomTabNavigator } from "@react-navigation/bottom-tabs";
 import HomeScreen from "./src/screens/HomeScreen/HomeScreen";
 import Home1 from "./src/screens/Home1/Home1";
 import Home2 from "./src/screens/Home2/Home2";
+<<<<<<< HEAD
 import Home3 from "./src/screens/Home3/Home3";
 import Login from "./src/screens/Login/Login";
 import Signup from "./src/screens/SignUp/Signup";
@@ -15,6 +16,8 @@ import CustomerChat from "./src/screens/CustomerChat/CustomerChat";
 import CustomerProfile from "./src/screens/CustomerProfile/CustomerProfile";
 import CustomerWallet from "./src/screens/CustomerWallet/CustomerWallet";
 import { Image } from "react-native";
+=======
+>>>>>>> parent of cd89396 (Added Third Screen)
 
 const Stack = createNativeStackNavigator();
 const Tab = createBottomTabNavigator();
@@ -122,6 +125,7 @@ const App = () => {
             component={Home2}
             options={{ headerShown: false }}
           />
+<<<<<<< HEAD
            <Stack.Screen
             name="Home3"
             component={Home3}
@@ -142,6 +146,8 @@ const App = () => {
             component={DashboardTabs}
             options={{ headerShown: false }}
           />
+=======
+>>>>>>> parent of cd89396 (Added Third Screen)
         </Stack.Navigator>
       </NavigationContainer>
     </GestureHandlerRootView>
