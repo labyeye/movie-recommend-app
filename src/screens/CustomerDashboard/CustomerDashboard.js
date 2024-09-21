@@ -8,6 +8,7 @@ import {
   View,
   FlatList,
   ScrollView,
+  TouchableOpacity,
 } from 'react-native';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 
@@ -74,8 +75,11 @@ const CustomerDashboard = () => {
         <View style={{width: '100%', height: '100%'}}>
           <Text style={styles.director}>{`${movie.director}`}</Text>
         </View>
-        <Text style={styles.rating}>{`${movie.rating}`}</Text>
+        <Text style={styles.rating}>{`⭐${movie.rating}`}</Text>
       </View>
+      <TouchableOpacity style={styles.wishlistButton}>
+        <Text style={styles.wishlistButtonText}>Add to Wishlist</Text>
+      </TouchableOpacity>
     </View>
   );
 
@@ -244,7 +248,7 @@ const styles = StyleSheet.create({
   },
   movieItem: {
     marginRight: 10,
-    width: 120,
+    width: 150,
     alignItems: 'center',
   },
   moviePhoto: {
@@ -264,7 +268,7 @@ const styles = StyleSheet.create({
     justifyContent: 'space-between',
     width: '80%',
     marginTop: 5,
-    height:"100%"
+    height: "100%",
   },
   director: {
     fontSize: 12,
@@ -283,6 +287,17 @@ const styles = StyleSheet.create({
   },
   categoryContainer: {
     width: '90%',
+  },
+  wishlistButton: {
+    marginTop: 10,
+    backgroundColor: '#2B2B2B',
+    borderRadius: 5,
+    padding: 8,
+    alignItems: 'center',
+  },
+  wishlistButtonText: {
+    color: 'white',
+    fontWeight: 'bold',
   },
 });
 
