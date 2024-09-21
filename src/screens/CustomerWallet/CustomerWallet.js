@@ -8,7 +8,7 @@ const WishlistScreen = ({ navigation }) => {
   const fetchWishlist = async () => {
     try {
       const token = await AsyncStorage.getItem('token');
-      const response = await fetch('http://172.20.10.6:8000/api/wishlist', {
+      const response = await fetch('http://172.20.10.6:8000/wishlist/', {
         headers: {
           Authorization: `Bearer ${token}`,
           'Content-Type': 'application/json',

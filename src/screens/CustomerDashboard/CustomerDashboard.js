@@ -1,4 +1,4 @@
-import React, {useEffect, useState} from 'react';
+import React, { useEffect, useState } from 'react';
 import {
   Image,
   SafeAreaView,
@@ -73,7 +73,7 @@ const CustomerDashboard = () => {
         throw new Error('Failed to fetch wishlist');
       }
       const wishlist = await response.json();
-      console.log(wishlist); // Handle this data as needed
+      setWishlistCount(wishlist.length); // Update wishlist count based on fetched wishlist
     } catch (error) {
       console.error('Error fetching wishlist:', error);
     }
@@ -82,47 +82,45 @@ const CustomerDashboard = () => {
   const addToWishlist = async movie => {
     try {
       const token = await AsyncStorage.getItem('token');
-      console.log('Token:', token);
-      console.log('Movie ID being added to wishlist:', movie._id);
-
       const response = await fetch('http://172.20.10.6:8000/wishlist/add', {
         method: 'POST',
         headers: {
           Authorization: `Bearer ${token}`,
           'Content-Type': 'application/json',
         },
-        body: JSON.stringify({movieId: movie._id}),
+        body: JSON.stringify({ movieId: movie._id }),
       });
-
-      console.log('Response Status:', response.status);
-      const responseText = await response.text(); // Get the response text
+  
+      const responseText = await response.text(); // Read as text for debugging
       console.log('Response Text:', responseText); // Log the raw response
-
+  
       if (!response.ok) {
         throw new Error('Failed to add to wishlist');
       }
-
-      fetchWishlist();
+  
+      const responseJson = JSON.parse(responseText); // Parse only if the response is okay
+  
       alert('Movie added to wishlist!');
     } catch (error) {
       console.error('Error adding to wishlist:', error);
       alert('Could not add to wishlist.');
     }
   };
+  
+  
 
   useEffect(() => {
     fetchUserData();
     fetchMovies();
-    fetchWishlist();
   }, []);
 
-  const renderOfferItem = ({item}) => (
+  const renderOfferItem = ({ item }) => (
     <Image style={styles.offerImage} source={item} resizeMode="cover" />
   );
 
-  const MovieItem = ({movie}) => (
+  const MovieItem = ({ movie }) => (
     <View style={styles.movieItem}>
-      <Image source={{uri: movie.photo}} style={styles.moviePhoto} />
+      <Image source={{ uri: movie.photo }} style={styles.moviePhoto} />
       <Text style={styles.title}>{movie.title}</Text>
       <View style={styles.detailsRow}>
         <Text style={styles.director}>{movie.director}</Text>
@@ -176,7 +174,7 @@ const CustomerDashboard = () => {
           <Text style={styles.specialOffersText}>Special Movies</Text>
           <Text style={styles.seeMore}>See More...</Text>
         </View>
-        <View style={{width: 500, height: 200}}>
+        <View style={{ width: 500, height: 200 }}>
           <FlatList
             data={offers}
             renderItem={renderOfferItem}
@@ -192,7 +190,7 @@ const CustomerDashboard = () => {
             <Text style={styles.genreTitle}>{genre}</Text>
             <FlatList
               data={movies.filter(movie => movie.genre === genre)}
-              renderItem={({item}) => <MovieItem movie={item} />}
+              renderItem={({ item }) => <MovieItem movie={item} />}
               keyExtractor={item => item._id}
               horizontal
               showsHorizontalScrollIndicator={false}
@@ -311,15 +309,13 @@ const styles = StyleSheet.create({
   title: {
     fontSize: 14,
     fontWeight: 'bold',
-    marginTop: 8,
     color: 'white',
+    marginTop: 5,
   },
   detailsRow: {
     flexDirection: 'row',
     justifyContent: 'space-between',
     width: '100%',
-    paddingHorizontal: 5,
-    marginTop: 5,
   },
   director: {
     fontSize: 12,
@@ -330,20 +326,14 @@ const styles = StyleSheet.create({
     color: 'yellow',
   },
   wishlistButton: {
-    backgroundColor: 'dodgerblue',
-    padding: 8,
+    marginTop: 5,
+    padding: 5,
+    backgroundColor: '#FF6B6B',
     borderRadius: 5,
-    marginTop: 8,
+    alignItems: 'center',
   },
   wishlistButtonText: {
     color: 'white',
-    fontWeight: 'bold',
-  },
-  flatListContainer: {
-    paddingHorizontal: 10,
-  },
-  flatList: {
-    marginBottom: 20,
   },
 });
 
