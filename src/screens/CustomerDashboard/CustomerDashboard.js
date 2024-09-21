@@ -16,6 +16,7 @@ const CustomerDashboard = () => {
   const [userName, setUserName] = useState('');
   const [loading, setLoading] = useState(true);
   const [movies, setMovies] = useState([]);
+  const [wishlistCount, setWishlistCount] = useState(0); // State for wishlist count
 
   const offers = [
     require('../../../assets/dashboardcustomer/offer.jpg'),
@@ -35,6 +36,7 @@ const CustomerDashboard = () => {
         });
         const data = await response.json();
         setUserName(data.name);
+        setWishlistCount(data.wishlistCount || 0); // Initialize wishlist count if available
       } else {
         console.error('No token found');
       }
@@ -58,6 +60,25 @@ const CustomerDashboard = () => {
     }
   };
 
+  const fetchWishlist = async () => {
+    try {
+      const token = await AsyncStorage.getItem('token');
+      const response = await fetch('http://172.20.10.6:8000/api/wishlist', {
+        headers: {
+          Authorization: `Bearer ${token}`,
+          'Content-Type': 'application/json',
+        },
+      });
+      if (!response.ok) {
+        throw new Error('Failed to fetch wishlist');
+      }
+      const likedMovies = await response.json();
+      console.log(likedMovies); // Handle this data as needed
+    } catch (error) {
+      console.error('Error fetching wishlist:', error);
+    }
+  };
+
   useEffect(() => {
     fetchUserData();
     fetchMovies();
@@ -72,12 +93,13 @@ const CustomerDashboard = () => {
       <Image source={{uri: movie.photo}} style={styles.moviePhoto} />
       <Text style={styles.title}>{movie.title}</Text>
       <View style={styles.detailsRow}>
-        <View style={{width: '100%', height: '100%'}}>
-          <Text style={styles.director}>{`${movie.director}`}</Text>
-        </View>
+        <Text style={styles.director}>{`${movie.director}`}</Text>
         <Text style={styles.rating}>{`⭐${movie.rating}`}</Text>
       </View>
-      <TouchableOpacity style={styles.wishlistButton}>
+      <TouchableOpacity
+        style={styles.wishlistButton}
+        onPress={() => addToWishlist(movie)} // Ensure addToWishlist is defined
+      >
         <Text style={styles.wishlistButtonText}>Add to Wishlist</Text>
       </TouchableOpacity>
     </View>
@@ -123,7 +145,7 @@ const CustomerDashboard = () => {
           <Text style={styles.specialOffersText}>Special Movies</Text>
           <Text style={styles.seeMore}>See More...</Text>
         </View>
-        <View style={{width: '100%', height: 200}}>
+        <View style={{width: 500, height: 200}}>
           <FlatList
             data={offers}
             renderItem={renderOfferItem}
@@ -145,7 +167,7 @@ const CustomerDashboard = () => {
               horizontal
               showsHorizontalScrollIndicator={false}
               contentContainerStyle={styles.flatListContainer}
-              style={styles.flatList} // Add style for height control
+              style={styles.flatList}
             />
           </View>
         ))}
@@ -229,11 +251,13 @@ const styles = StyleSheet.create({
   offerImageContainer: {
     marginTop: 15,
     width: '100%',
+    gap:20
   },
   offerImage: {
-    width: '70%',
-    height: '100%',
+    width: 200,
+    height: 150,
     borderRadius: 10,
+    resizeMode:"cover"
   },
   genreSection: {
     marginBottom: 20,
@@ -248,14 +272,16 @@ const styles = StyleSheet.create({
   },
   movieItem: {
     marginRight: 10,
-    width: 150,
+    width: 200,
+
     alignItems: 'center',
+    borderRadius: 10,
   },
   moviePhoto: {
-    width: 100,
+    width: 150,
     height: 150,
     borderRadius: 5,
-    resizeMode: 'cover',
+    resizeMode: 'contain',
   },
   title: {
     fontSize: 14,
@@ -268,7 +294,6 @@ const styles = StyleSheet.create({
     justifyContent: 'space-between',
     width: '80%',
     marginTop: 5,
-    height: "100%",
   },
   director: {
     fontSize: 12,
@@ -281,6 +306,7 @@ const styles = StyleSheet.create({
   flatListContainer: {
     paddingVertical: 10,
     overflow: 'hidden',
+    height:"100%"
   },
   flatList: {
     maxHeight: 200,
@@ -290,11 +316,21 @@ const styles = StyleSheet.create({
   },
   wishlistButton: {
     marginTop: 10,
-    backgroundColor: '#2B2B2B',
+    backgroundColor: '#FF6347', // Visibility color
     borderRadius: 5,
-    padding: 8,
+    paddingVertical: 10, // Increase padding for better touch area
+    paddingHorizontal: 15,
     alignItems: 'center',
-  },
+    width: '100%', // Ensure it takes full width of parent
+    elevation: 3, // Add shadow effect (Android)
+    shadowColor: '#000', // Shadow for iOS
+    shadowOffset: {
+        width: 0,
+        height: 2,
+    },
+    shadowOpacity: 0.3,
+    shadowRadius: 2,
+},
   wishlistButtonText: {
     color: 'white',
     fontWeight: 'bold',

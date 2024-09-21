@@ -3,6 +3,7 @@ const mongoose = require("mongoose");
 const bodyParser = require("body-parser");
 const authRoutes = require("./routes/auth");
 const movieRoutes = require('./routes/movies'); // Ensure the correct path
+const wishRoutes = require('./routes/wishlist'); // Ensure the correct path
 
 require("dotenv").config();
 
@@ -18,6 +19,7 @@ mongoose
 // Routes
 app.use("/api/auth", authRoutes);
 app.use("/movies", movieRoutes);
+app.use("api/wishlist", wishRoutes);
 
 const PORT = process.env.PORT || 8000;
 

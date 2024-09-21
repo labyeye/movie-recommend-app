@@ -85,7 +85,7 @@ const CustomerProfile = () => {
             source={require("../../../assets/dashboardcustomer/orders.png")}
           />
           <Text style={{ fontSize: 16, color: "white", marginLeft: 20 }}>
-            Orders
+            Wish List 
           </Text>
         </View>
         <View
