@@ -1,262 +1,94 @@
-import React from "react";
-import {
-  Image,
-  SafeAreaView,
-  StyleSheet,
-  Text,
-  TextInput,
-  TouchableOpacity,
-  View,
-  FlatList,
-} from "react-native";
-import { Dimensions } from "react-native";
+import React, { useEffect, useState } from 'react';
+import { View, Text, FlatList, StyleSheet, TouchableOpacity } from 'react-native';
+import AsyncStorage from '@react-native-async-storage/async-storage';
 
-const CustomerWallet = () => {
-  // Static data for the chart
-  const transactions = [
-    {
-      id: "1",
-      name: "Rajesh",
-      food: "Wheat",
-      price: "-₹1000",
-      date: "2024-08-01",
-    },
-    { id: "2", name: "Amit", food: "Rice", price: "+₹800", date: "2024-08-02" },
-    {
-      id: "3",
-      name: "Anjali",
-      food: "Apple",
-      price: "-₹1200",
-      date: "2024-08-03",
-    },
-    {
-      id: "4",
-      name: "Suman",
-      food: "Tomato",
-      price: "-₹600",
-      date: "2024-08-04",
-    },
-    {
-      id: "5",
-      name: "Ravi",
-      food: "Milk",
-      price: "-₹1500",
-      date: "2024-08-05",
-    },
-  ];
+const WishlistScreen = ({ navigation }) => {
+  const [wishlistMovies, setWishlistMovies] = useState([]);
 
-  // Function to render each item in FlatList
-  const renderTransaction = ({ item }) => (
-    <View style={styles.transactionItem}>
-      <View style={styles.transactionLeft}>
-        <Image
-          source={require("../../../assets/dashboardcustomer/profile.png")}
-          style={styles.profileImage}
-        />
-        <View style={styles.transactionDetails}>
-          <Text style={styles.transactionName}>
-            Sent Money to {item.name}
-          </Text>
-          <Text style={styles.transactionDate}>{item.date}</Text>
-          <Text style={{ color: "cyan", fontSize: 13 }}>View Details</Text>
-        </View>
-      </View>
-      <Text style={styles.transactionAmount}>{item.price}</Text>
+  const fetchWishlist = async () => {
+    try {
+      const token = await AsyncStorage.getItem('token');
+      const response = await fetch('http://172.20.10.6:8000/api/wishlist', {
+        headers: {
+          Authorization: `Bearer ${token}`,
+          'Content-Type': 'application/json',
+        },
+      });
+      if (!response.ok) {
+        throw new Error('Failed to fetch wishlist');
+      }
+      const data = await response.json();
+      setWishlistMovies(data); // Assuming this contains an array of movie objects
+    } catch (error) {
+      console.error('Error fetching wishlist:', error);
+    }
+  };
+
+  useEffect(() => {
+    fetchWishlist();
+  }, []);
+
+  const renderMovieItem = ({ item }) => (
+    <View style={styles.movieItem}>
+      <Text style={styles.movieTitle}>{item.title}</Text>
+      <Text style={styles.movieDirector}>{item.director}</Text>
+      <Text style={styles.movieRating}>{`⭐${item.rating}`}</Text>
     </View>
   );
 
   return (
-    <SafeAreaView style={styles.container}>
-      <View style={styles.header}>
-        <View
-          style={{
-            width: "40%",
-            height: "100%",
-            flexDirection: "row",
-            alignItems: "center",
-            justifyContent: "center",
-          }}
-        >
-          <Image
-            style={{ width: "30%", height: "80%", marginLeft: 20 }}
-            resizeMode="contain"
-            source={require("../../../assets/dashboardcustomer/profile.png")}
-          />
-          <Text style={{ color: "white", fontWeight: "bold", marginLeft: 10 }}>
-            Labh Bothra
-          </Text>
-        </View>
-        <View
-          style={{
-            width: "20%",
-            height: "100%",
-            flexDirection: "row",
-            alignItems: "center",
-            justifyContent: "flex-end",
-            gap: 20,
-          }}
-        >
-          <Image
-            style={{
-              width: "40%",
-              height: "40%",
-              overflow: "hidden",
-            }}
-            resizeMode="contain"
-            source={require("../../../assets/dashboardcustomer/bell.png")}
-          />
-          <Image
-            style={{
-              width: "35%",
-              height: "35%",
-              overflow: "hidden",
-              marginRight: 20,
-            }}
-            resizeMode="contain"
-            source={require("../../../assets/dashboardcustomer/search.png")}
-          />
-        </View>
-      </View>
-      <View
-        style={{
-          height: "8%",
-          width: "100%",
-          alignItems: "center",
-          justifyContent: "center",
-
-          flexDirection: "row",
-          marginTop: 20,
-        }}
-      >
-        <Text style={{ fontSize: 50, color: "white" }}>
-          <Text> ₹</Text>
-          <Text>5000</Text>
-        </Text>
-      </View>
-      <View
-        style={{
-          width: "75%",
-          height: "5%",
-          flexDirection: "row",
-          justifyContent: "space-between",
-          marginTop: 35,
-        }}
-      >
-        <TouchableOpacity
-          style={{
-            width: "40%",
-            height: "100%",
-            backgroundColor: "green",
-            borderRadius: 40,
-            alignItems: "center",
-            justifyContent: "center",
-          }}
-        >
-          <Text style={{ color: "white", fontWeight: "bold" }}>Add Funds</Text>
-        </TouchableOpacity>
-        <TouchableOpacity
-          style={{
-            width: "40%",
-            height: "100%",
-            backgroundColor: "green",
-            borderRadius: 40,
-            alignItems: "center",
-            justifyContent: "center",
-          }}
-        >
-          <Text style={{ color: "white", fontWeight: "bold" }}>Withdraw</Text>
-        </TouchableOpacity>
-      </View>
-      <View style={{ alignItems: "flex-start", width: "100%", marginTop: 35 }}>
-        <Text
-          style={{
-            color: "white",
-            textAlign: "right",
-            fontSize: 30,
-            padding: 15,
-          }}
-        >
-          Transactions
-        </Text>
-      </View>
-
-      {/* Transactions FlatList */}
-      <View
-        style={{
-          width: "100%",
-          height: "50%",
-          marginTop: 10,
-          alignItems: "center",
-          justifyContent: "space-between",
-        }}
-      >
-        <FlatList
-          data={transactions}
-          renderItem={renderTransaction}
-          keyExtractor={(item) => item.id}
-          ItemSeparatorComponent={() => <View style={styles.itemSeparator} />}
-        />
-      </View>
-
-      <View style={{ width: "95%", height: "25%", marginTop: 10 }}></View>
-    </SafeAreaView>
+    <View style={styles.container}>
+      <Text style={styles.headerText}>Your Wishlist</Text>
+      <FlatList
+        data={wishlistMovies}
+        renderItem={renderMovieItem}
+        keyExtractor={item => item._id}
+      />
+      <TouchableOpacity onPress={() => navigation.goBack()} style={styles.backButton}>
+        <Text style={styles.backButtonText}>Back</Text>
+      </TouchableOpacity>
+    </View>
   );
 };
 
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: "#191A1F",
-    alignItems: "center",
+    padding: 20,
+    backgroundColor: '#191A1F',
   },
-  header: {
-    width: "100%",
-    height: "8%",
-    justifyContent: "space-between",
-    flexDirection: "row",
-    alignItems: "center",
-    marginTop: 20,
+  headerText: {
+    fontSize: 24,
+    fontWeight: 'bold',
+    color: 'white',
+    marginBottom: 20,
   },
-  transactionItem: {
-    flexDirection: "row",
-    justifyContent: "space-between",
-    alignItems: "center",
+  movieItem: {
+    marginBottom: 15,
     padding: 10,
-    backgroundColor: "#1F2126",
-    borderRadius: 8,
-    width: "95%",
-    alignSelf: "center",
+    backgroundColor: '#2B2B2B',
+    borderRadius: 10,
   },
-  itemSeparator: {
-    height: 15, // Height of the gap between items
+  movieTitle: {
+    fontSize: 18,
+    color: 'white',
   },
-  transactionLeft: {
-    flexDirection: "row",
-    alignItems: "center",
+  movieDirector: {
+    color: 'lightgrey',
   },
-  profileImage: {
-    width: 40,
-    height: 40,
-    borderRadius: 20,
-    marginRight: 10,
+  movieRating: {
+    color: 'lightgrey',
   },
-  transactionDetails: {
-    justifyContent: "center",
+  backButton: {
+    marginTop: 20,
+    padding: 10,
+    backgroundColor: '#FF6347',
+    borderRadius: 5,
+    alignItems: 'center',
   },
-  transactionName: {
-    color: "white",
-    fontSize: 16,
-    fontWeight: "bold",
-  },
-  transactionDate: {
-    color: "#AAAAAA",
-    fontSize: 12,
-  },
-  transactionAmount: {
-    color: "red",
-    fontSize: 16,
-    fontWeight: "bold",
+  backButtonText: {
+    color: 'white',
   },
 });
 
-export default CustomerWallet;
+export default WishlistScreen;

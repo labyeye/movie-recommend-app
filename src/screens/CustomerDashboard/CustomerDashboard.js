@@ -36,7 +36,7 @@ const CustomerDashboard = () => {
         });
         const data = await response.json();
         setUserName(data.name);
-        setWishlistCount(data.wishlistCount || 0); // Initialize wishlist count if available
+        setWishlistCount(data.wishlistCount || 0);
       } else {
         console.error('No token found');
       }
@@ -63,7 +63,7 @@ const CustomerDashboard = () => {
   const fetchWishlist = async () => {
     try {
       const token = await AsyncStorage.getItem('token');
-      const response = await fetch('http://172.20.10.6:8000/api/wishlist', {
+      const response = await fetch('http://172.20.10.6:8000/wishlist/', {
         headers: {
           Authorization: `Bearer ${token}`,
           'Content-Type': 'application/json',
@@ -72,16 +72,48 @@ const CustomerDashboard = () => {
       if (!response.ok) {
         throw new Error('Failed to fetch wishlist');
       }
-      const likedMovies = await response.json();
-      console.log(likedMovies); // Handle this data as needed
+      const wishlist = await response.json();
+      console.log(wishlist); // Handle this data as needed
     } catch (error) {
       console.error('Error fetching wishlist:', error);
+    }
+  };
+
+  const addToWishlist = async movie => {
+    try {
+      const token = await AsyncStorage.getItem('token');
+      console.log('Token:', token);
+      console.log('Movie ID being added to wishlist:', movie._id);
+
+      const response = await fetch('http://172.20.10.6:8000/wishlist/add', {
+        method: 'POST',
+        headers: {
+          Authorization: `Bearer ${token}`,
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({movieId: movie._id}),
+      });
+
+      console.log('Response Status:', response.status);
+      const responseText = await response.text(); // Get the response text
+      console.log('Response Text:', responseText); // Log the raw response
+
+      if (!response.ok) {
+        throw new Error('Failed to add to wishlist');
+      }
+
+      fetchWishlist();
+      alert('Movie added to wishlist!');
+    } catch (error) {
+      console.error('Error adding to wishlist:', error);
+      alert('Could not add to wishlist.');
     }
   };
 
   useEffect(() => {
     fetchUserData();
     fetchMovies();
+    fetchWishlist();
   }, []);
 
   const renderOfferItem = ({item}) => (
@@ -93,13 +125,12 @@ const CustomerDashboard = () => {
       <Image source={{uri: movie.photo}} style={styles.moviePhoto} />
       <Text style={styles.title}>{movie.title}</Text>
       <View style={styles.detailsRow}>
-        <Text style={styles.director}>{`${movie.director}`}</Text>
+        <Text style={styles.director}>{movie.director}</Text>
         <Text style={styles.rating}>{`⭐${movie.rating}`}</Text>
       </View>
       <TouchableOpacity
         style={styles.wishlistButton}
-        onPress={() => addToWishlist(movie)} // Ensure addToWishlist is defined
-      >
+        onPress={() => addToWishlist(movie)}>
         <Text style={styles.wishlistButtonText}>Add to Wishlist</Text>
       </TouchableOpacity>
     </View>
@@ -137,7 +168,7 @@ const CustomerDashboard = () => {
         <View style={styles.searchContainer}>
           <TextInput
             style={styles.searchInput}
-            placeholder="Search for Interesting Foods"
+            placeholder="Search for Interesting Movies"
             placeholderTextColor={'grey'}
           />
         </View>
@@ -156,7 +187,6 @@ const CustomerDashboard = () => {
           />
         </View>
 
-        {/* Movie Genres Section */}
         {genres.map(genre => (
           <View key={genre} style={styles.genreSection}>
             <Text style={styles.genreTitle}>{genre}</Text>
@@ -171,10 +201,6 @@ const CustomerDashboard = () => {
             />
           </View>
         ))}
-
-        <View style={styles.categoryContainer}>
-          {/* Existing category buttons */}
-        </View>
       </ScrollView>
     </SafeAreaView>
   );
@@ -251,13 +277,13 @@ const styles = StyleSheet.create({
   offerImageContainer: {
     marginTop: 15,
     width: '100%',
-    gap:20
+    gap: 20,
   },
   offerImage: {
     width: 200,
     height: 150,
     borderRadius: 10,
-    resizeMode:"cover"
+    resizeMode: 'cover',
   },
   genreSection: {
     marginBottom: 20,
@@ -272,68 +298,52 @@ const styles = StyleSheet.create({
   },
   movieItem: {
     marginRight: 10,
-    width: 200,
-
+    width: 170,
     alignItems: 'center',
     borderRadius: 10,
   },
   moviePhoto: {
     width: 150,
     height: 150,
-    borderRadius: 5,
+    borderRadius: 10,
     resizeMode: 'contain',
   },
   title: {
     fontSize: 14,
     fontWeight: 'bold',
+    marginTop: 8,
     color: 'white',
-    marginTop: 5,
   },
   detailsRow: {
     flexDirection: 'row',
     justifyContent: 'space-between',
-    width: '80%',
+    width: '100%',
+    paddingHorizontal: 5,
     marginTop: 5,
   },
   director: {
     fontSize: 12,
-    color: 'lightgrey',
+    color: 'grey',
   },
   rating: {
     fontSize: 12,
-    color: 'lightgrey',
-  },
-  flatListContainer: {
-    paddingVertical: 10,
-    overflow: 'hidden',
-    height:"100%"
-  },
-  flatList: {
-    maxHeight: 200,
-  },
-  categoryContainer: {
-    width: '90%',
+    color: 'yellow',
   },
   wishlistButton: {
-    marginTop: 10,
-    backgroundColor: '#FF6347', // Visibility color
+    backgroundColor: 'dodgerblue',
+    padding: 8,
     borderRadius: 5,
-    paddingVertical: 10, // Increase padding for better touch area
-    paddingHorizontal: 15,
-    alignItems: 'center',
-    width: '100%', // Ensure it takes full width of parent
-    elevation: 3, // Add shadow effect (Android)
-    shadowColor: '#000', // Shadow for iOS
-    shadowOffset: {
-        width: 0,
-        height: 2,
-    },
-    shadowOpacity: 0.3,
-    shadowRadius: 2,
-},
+    marginTop: 8,
+  },
   wishlistButtonText: {
     color: 'white',
     fontWeight: 'bold',
+  },
+  flatListContainer: {
+    paddingHorizontal: 10,
+  },
+  flatList: {
+    marginBottom: 20,
   },
 });
 
