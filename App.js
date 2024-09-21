@@ -13,8 +13,9 @@ import Dashboard from './src/screens/Dashboard/Dashboard';
 import CustomerDashboard from './src/screens/CustomerDashboard/CustomerDashboard';
 import CustomerChat from './src/screens/CustomerChat/CustomerChat';
 import CustomerProfile from './src/screens/CustomerProfile/CustomerProfile';
-import CustomerWallet from './src/screens/CustomerWallet/CustomerWallet';
+import CustomerWallet from './src/screens/CustomerWallet/Wishlist';
 import {Image} from 'react-native';
+import WishlistScreen from './src/screens/CustomerWallet/Wishlist';
 
 const Stack = createNativeStackNavigator();
 const Tab = createBottomTabNavigator();
@@ -29,6 +30,11 @@ const DashboardTabs = () => {
               ? require('./assets/icons/home-focused.png')
               : require('./assets/icons/home.png');
           } else if (route.name === 'Profile') {
+            iconName = focused
+              ? require('./assets/icons/profile-focused.png')
+              : require('./assets/icons/profile.png');
+          }
+          else if (route.name === 'WishList') {
             iconName = focused
               ? require('./assets/icons/profile-focused.png')
               : require('./assets/icons/profile.png');
@@ -68,6 +74,11 @@ const DashboardTabs = () => {
       <Tab.Screen
         name="Home"
         component={CustomerDashboard}
+        options={{headerShown: false}}
+      />
+      <Tab.Screen
+        name="WishList"
+        component={WishlistScreen}
         options={{headerShown: false}}
       />
 
