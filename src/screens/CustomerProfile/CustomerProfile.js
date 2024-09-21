@@ -9,7 +9,6 @@ import {
   View,
   FlatList,
 } from "react-native";
-import { Dimensions } from "react-native";
 
 const CustomerProfile = () => {
   // Static data for the chart

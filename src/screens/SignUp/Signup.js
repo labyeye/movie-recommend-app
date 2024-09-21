@@ -44,7 +44,7 @@ const Signup = ({ navigation }) => {
     }
 
     try {
-      const response = await fetch('http://172.20.10.6:4000/api/auth/signup', {
+      const response = await fetch('http://172.20.10.6:8000/api/auth/signup', {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
