@@ -9,40 +9,40 @@ import {
   SafeAreaView,
   Alert,
 } from 'react-native';
+import AsyncStorage from '@react-native-async-storage/async-storage';
+
 
 const Login = ({ navigation }) => {
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [passwordVisible, setPasswordVisible] = useState(false);
 
-  const handleLogin = async () => {
-    if (!email || !password) {
-      Alert.alert('Error', 'Please fill in both email and password.');
-      return;
+
+// Inside your login function
+const handleLogin = async () => {
+  try {
+    const response = await fetch("http://172.20.10.6:4000/api/auth/login", {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+      },
+      body: JSON.stringify({ email, password }),
+    });
+
+    const data = await response.json();
+    if (response.ok) {
+      // Save the token in AsyncStorage
+      await AsyncStorage.setItem('userToken', data.token);
+      // Navigate to CustomerDashboard
+      navigation.navigate('Dashboard');
+    } else {
+      alert(data.msg);
     }
+  } catch (error) {
+    console.error("Login error:", error);
+  }
+};
 
-    try {
-      const response = await fetch('http://localhost:8000/api/auth/login', {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify({ email, password }),
-      });
-
-      const data = await response.json();
-
-      if (response.ok) {
-        Alert.alert('Success', 'Logged in successfully!');
-        navigation.navigate('Dashboard');
-      } else {
-        Alert.alert('Error', data.message || 'Login failed.');
-      }
-    } catch (error) {
-      Alert.alert('Error', 'Something went wrong. Please try again.');
-      console.error(error);
-    }
-  };
 
   return (
     <SafeAreaView style={styles.container}>

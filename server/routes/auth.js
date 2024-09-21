@@ -1,85 +1,104 @@
-const express = require("express");
-const router = express.Router();
-const User = require("../models/User");
-const bcrypt = require("bcryptjs");
-const jwt = require("jsonwebtoken");
+const express = require('express');
+const jwt = require('jsonwebtoken');
+const bcrypt = require('bcryptjs');
+const { body, validationResult } = require('express-validator');
 
-router.post("/signup", async (req, res) => {
-  const { name, email, phone, password } = req.body;
-  if (!name || !email || !phone || !password) {
-    return res.status(400).json({ msg: "Please fill in all fields" });
-  }
-  try {
-    let user = await User.findOne({ email });
-    if (user) {
-      return res.status(400).json({ msg: "User already exists" });
+const router = express.Router();
+
+// Sample user database simulation
+const users = []; // In a real-world app, you'd use a database
+
+// @route   POST api/auth/signup
+// @desc    Register user
+router.post(
+  '/signup',
+  [
+    body('email', 'Please include a valid email').isEmail(),
+    body('password', 'Password must be 6 or more characters').isLength({ min: 6 }),
+  ],
+  async (req, res) => {
+    const errors = validationResult(req);
+    if (!errors.isEmpty()) {
+      return res.status(400).json({ errors: errors.array() });
     }
-    user = new User({
-      name,
+
+    const { email, password } = req.body;
+
+    // Check if user exists
+    let user = users.find(u => u.email === email);
+    if (user) {
+      return res.status(400).json({ msg: 'User already exists' });
+    }
+
+    // Hash the password
+    const salt = await bcrypt.genSalt(10);
+    const hashedPassword = await bcrypt.hash(password, salt);
+
+    // Create a new user
+    user = {
+      id: users.length + 1,
       email,
-      phone,
-      password,
-    });
-    await user.save();
+      password: hashedPassword,
+    };
+
+    users.push(user);
+
     const payload = {
       user: {
         id: user.id,
+        email: user.email,
       },
     };
+
+    // Generate token
     jwt.sign(payload, process.env.JWT_SECRET, { expiresIn: 3600 }, (err, token) => {
       if (err) throw err;
-      res.json({ token, user: { id: user.id, name: user.name, email: user.email, phone: user.phone } });
+      res.json({ token });
     });
-  } catch (err) {
-    console.error(err.message);
-    res.status(500).send("Server error");
   }
-});
+);
 
-router.post("/login", async (req, res) => {
-  const { email, password } = req.body;
-  if (!email || !password) {
-    return res.status(400).json({ msg: "Please enter all fields" });
-  }
-  try {
-    let user = await User.findOne({ email });
-    if (!user) {
-      return res.status(400).json({ msg: "Invalid credentials" });
+// @route   POST api/auth/login
+// @desc    Authenticate user & get token
+router.post(
+  '/login',
+  [
+    body('email', 'Please include a valid email').isEmail(),
+    body('password', 'Password is required').exists(),
+  ],
+  async (req, res) => {
+    const errors = validationResult(req);
+    if (!errors.isEmpty()) {
+      return res.status(400).json({ errors: errors.array() });
     }
+
+    const { email, password } = req.body;
+
+    // Check if user exists
+    let user = users.find(u => u.email === email);
+    if (!user) {
+      return res.status(400).json({ msg: 'Invalid Credentials' });
+    }
+
+    // Compare password
     const isMatch = await bcrypt.compare(password, user.password);
     if (!isMatch) {
-      return res.status(400).json({ msg: "Invalid credentials" });
+      return res.status(400).json({ msg: 'Invalid Credentials' });
     }
+
     const payload = {
       user: {
         id: user.id,
-        name: user.name,  // Include the user's name in the payload
+        email: user.email,
       },
     };
+
+    // Generate token
     jwt.sign(payload, process.env.JWT_SECRET, { expiresIn: 3600 }, (err, token) => {
       if (err) throw err;
-      res.json({ token, user: { id: user.id, name: user.name, email: user.email } });
+      res.json({ token });
     });
-  } catch (err) {
-    console.error(err.message);
-    res.status(500).send("Server error");
   }
-});
-
-router.get("/user", auth, async (req, res) => {
-  try {
-    // Get user ID from the token
-    const userId = req.user.id; // This is set in the auth middleware
-    const user = await User.findById(userId).select("-password"); // Exclude the password field
-    if (!user) {
-      return res.status(404).json({ msg: "User not found" });
-    }
-    res.json(user);
-  } catch (err) {
-    console.error(err.message);
-    res.status(500).send("Server error");
-  }
-});
-
+);
 
 module.exports = router;
