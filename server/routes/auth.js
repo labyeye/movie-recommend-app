@@ -5,7 +5,6 @@ const bcrypt = require("bcryptjs");
 const jwt = require("jsonwebtoken");
 const auth = require("../middleware/auth"); 
 const { default: AsyncStorage } = require("@react-native-async-storage/async-storage");
-// User signup route
 router.post("/signup", async (req, res) => {
   const { name, email, phone, password } = req.body;
   if (!name || !email || !phone || !password) {
@@ -16,22 +15,15 @@ router.post("/signup", async (req, res) => {
     if (user) {
       return res.status(400).json({ msg: "User already exists" });
     }
-
-    // Hash the password
     const salt = await bcrypt.genSalt(10);
     const hashedPassword = await bcrypt.hash(password, salt);
-
-    // Create a new user
     user = new User({
       name,
       email,
       phone,
-      password: hashedPassword, // Store hashed password
+      password: hashedPassword, 
     });
-
     await user.save();
-
-    // Generate JWT token
     const payload = {
       user: {
         id: user.id,
@@ -55,8 +47,6 @@ router.post("/signup", async (req, res) => {
     res.status(500).send("Server error");
   }
 });
-
-// User login route
 router.post("/login", async (req, res) => {
   const { email, password } = req.body;
   if (!email || !password) {

@@ -5,7 +5,6 @@ import {
   StyleSheet,
   Text,
   TextInput,
-  TouchableOpacity,
   View,
   FlatList,
   ScrollView,
@@ -15,6 +14,7 @@ import AsyncStorage from '@react-native-async-storage/async-storage';
 const CustomerDashboard = () => {
   const [userName, setUserName] = useState('');
   const [loading, setLoading] = useState(true);
+  const [movies, setMovies] = useState([]);
 
   const offers = [
     require('../../../assets/dashboardcustomer/offer.jpg'),
@@ -34,7 +34,6 @@ const CustomerDashboard = () => {
         });
         const data = await response.json();
         setUserName(data.name);
-        console.log(data);
       } else {
         console.error('No token found');
       }
@@ -45,24 +44,42 @@ const CustomerDashboard = () => {
     }
   };
 
+  const fetchMovies = async () => {
+    try {
+      const response = await fetch('http://172.20.10.6:8000/movies/moviedata');
+      if (!response.ok) {
+        throw new Error(`HTTP error! status: ${response.status}`);
+      }
+      const data = await response.json();
+      setMovies(data);
+    } catch (error) {
+      console.error('Error fetching movies:', error);
+    }
+  };
+
   useEffect(() => {
     fetchUserData();
+    fetchMovies();
   }, []);
-
-  const renderItem = ({item}) => (
-    <View style={styles.itemContainer}>
-      <Image source={item.photo} style={styles.photo} />
-      <View style={styles.textContainer}>
-        <Text style={styles.name}>{item.name}</Text>
-        <Text style={styles.farmer}>{item.farmer}</Text>
-        <Text style={styles.price}>{item.price}</Text>
-      </View>
-    </View>
-  );
 
   const renderOfferItem = ({item}) => (
     <Image style={styles.offerImage} source={item} resizeMode="cover" />
   );
+
+  const MovieItem = ({movie}) => (
+    <View style={styles.movieItem}>
+      <Image source={{uri: movie.photo}} style={styles.moviePhoto} />
+      <Text style={styles.title}>{movie.title}</Text>
+      <View style={styles.detailsRow}>
+        <View style={{width: '100%', height: '100%'}}>
+          <Text style={styles.director}>{`${movie.director}`}</Text>
+        </View>
+        <Text style={styles.rating}>{`${movie.rating}`}</Text>
+      </View>
+    </View>
+  );
+
+  const genres = [...new Set(movies.map(movie => movie.genre))];
 
   return (
     <SafeAreaView style={styles.container}>
@@ -102,18 +119,36 @@ const CustomerDashboard = () => {
           <Text style={styles.specialOffersText}>Special Movies</Text>
           <Text style={styles.seeMore}>See More...</Text>
         </View>
-        <View style={styles.offerImageContainer}>
+        <View style={{width: '100%', height: 200}}>
           <FlatList
             data={offers}
             renderItem={renderOfferItem}
             keyExtractor={(item, index) => index.toString()}
             horizontal
             showsHorizontalScrollIndicator={false}
-            contentContainerStyle={styles.offerFlatListContent}
+            contentContainerStyle={styles.offerImageContainer}
           />
         </View>
 
-       
+        {/* Movie Genres Section */}
+        {genres.map(genre => (
+          <View key={genre} style={styles.genreSection}>
+            <Text style={styles.genreTitle}>{genre}</Text>
+            <FlatList
+              data={movies.filter(movie => movie.genre === genre)}
+              renderItem={({item}) => <MovieItem movie={item} />}
+              keyExtractor={item => item._id}
+              horizontal
+              showsHorizontalScrollIndicator={false}
+              contentContainerStyle={styles.flatListContainer}
+              style={styles.flatList} // Add style for height control
+            />
+          </View>
+        ))}
+
+        <View style={styles.categoryContainer}>
+          {/* Existing category buttons */}
+        </View>
       </ScrollView>
     </SafeAreaView>
   );
@@ -196,70 +231,58 @@ const styles = StyleSheet.create({
     height: '100%',
     borderRadius: 10,
   },
-  categoryContainer: {
-    width: '90%',
+  genreSection: {
+    marginBottom: 20,
+    paddingHorizontal: 10,
+    width: '100%',
   },
-  categoryRow: {
-    flexDirection: 'row',
-    justifyContent: 'space-between',
+  genreTitle: {
+    fontSize: 18,
+    fontWeight: 'bold',
     marginBottom: 10,
+    color: 'white',
   },
-  categoryButton: {
-    flex: 1,
+  movieItem: {
+    marginRight: 10,
+    width: 120,
     alignItems: 'center',
-    padding: 10,
-    backgroundColor: '#2B2B2B',
-    borderRadius: 10,
-    marginHorizontal: 5,
   },
-  categoryImage: {
-    width: 50,
-    height: 50,
+  moviePhoto: {
+    width: 100,
+    height: 150,
+    borderRadius: 5,
+    resizeMode: 'cover',
   },
-  categoryText: {
+  title: {
+    fontSize: 14,
+    fontWeight: 'bold',
     color: 'white',
     marginTop: 5,
   },
-  offerImageContainer: {
-    marginTop: 15,
-    width: "100%",
-    paddingBottom: 20, // Add padding if needed to prevent cutoff
-  },
-  
-  offerFlatListContent: {
-    alignItems: 'center', // Center items
-  },
-  
-  offerImage: {
-    width: 150, // Adjust width as needed
-    height: 100, // Adjust height as needed
-    borderRadius: 10,
-    marginHorizontal: 5, // Adjust the horizontal margin to reduce the gap
-  },
-  
-  itemContainer: {
+  detailsRow: {
     flexDirection: 'row',
-    alignItems: 'center',
-    marginBottom: 10,
+    justifyContent: 'space-between',
+    width: '80%',
+    marginTop: 5,
+    height:"100%"
   },
-  photo: {
-    width: 50,
-    height: 50,
-    borderRadius: 10,
+  director: {
+    fontSize: 12,
+    color: 'lightgrey',
   },
-  textContainer: {
-    marginLeft: 10,
+  rating: {
+    fontSize: 12,
+    color: 'lightgrey',
   },
-  name: {
-    color: 'white',
-    fontWeight: 'bold',
+  flatListContainer: {
+    paddingVertical: 10,
+    overflow: 'hidden',
   },
-  farmer: {
-    color: 'grey',
+  flatList: {
+    maxHeight: 200,
   },
-  price: {
-    color: 'green',
-    fontWeight: 'bold',
+  categoryContainer: {
+    width: '90%',
   },
 });
 

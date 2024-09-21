@@ -2,6 +2,8 @@ const express = require("express");
 const mongoose = require("mongoose");
 const bodyParser = require("body-parser");
 const authRoutes = require("./routes/auth");
+const movieRoutes = require('./routes/movies'); // Ensure the correct path
+
 require("dotenv").config();
 
 const app = express();
@@ -15,6 +17,7 @@ mongoose
 
 // Routes
 app.use("/api/auth", authRoutes);
+app.use("/movies", movieRoutes);
 
 const PORT = process.env.PORT || 8000;
 
